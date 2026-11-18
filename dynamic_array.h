@@ -120,7 +120,9 @@ void da_free(tDynamicArray *da)
 {
 	if (!da) return;
 	free(da->array);
+	da->array = NULL;
 	free(da);
+	da = NULL;
 }
 
 tDynamicArray *da_create(size_t item_size, const char *type)
@@ -151,6 +153,7 @@ tDynamicArray *da_create(size_t item_size, const char *type)
 
 bool da_append(tDynamicArray *da, void *value)
 {
+	if (!da || !value) return false;
 	void     *new_array;
 	void     *target;
 
@@ -178,6 +181,7 @@ bool da_append(tDynamicArray *da, void *value)
 
 void *da_get(tDynamicArray *da, size_t index)
 {
+	if (!da) return NULL;
 	if (index >= da->count)
 	{
 			int8_t *err = _DAERROR;
@@ -190,6 +194,7 @@ void *da_get(tDynamicArray *da, size_t index)
 
 bool da_set(tDynamicArray *da, size_t index, void *value)
 {
+	if (!da || !value) return false;
 	void     *target;
 
 	if (index >= da->count)
@@ -205,6 +210,7 @@ bool da_set(tDynamicArray *da, size_t index, void *value)
 
 bool da_insert(tDynamicArray *da, size_t index, void *value)
 {
+	if (!da || !value) return false;
 	void    *new_array;
 	void    *target;
 	void    *src;
@@ -248,6 +254,7 @@ bool da_insert(tDynamicArray *da, size_t index, void *value)
 
 bool da_pop(tDynamicArray *da, size_t index, void *buf)
 {
+	if (!da || !buf) return false;
 	size_t elements_to_move;
 	void *src;
 	void *dst;
@@ -258,7 +265,7 @@ bool da_pop(tDynamicArray *da, size_t index, void *buf)
 		*err = INDEX_OOB_ERROR;
 		return false;
 	}
-	if buf != NULL memcpy(buf, ((uint8_t *)da->array + (index * da->item_size)), da->item_size);
+	if (buf != NULL) memcpy(buf, ((uint8_t *)da->array + (index * da->item_size)), da->item_size);
 	elements_to_move = da->count - index - 1;
 	src = (uint8_t *)da->array + ((index + 1) * da->item_size);
 	dst = (uint8_t *)da->array + (index * da->item_size);
@@ -270,6 +277,7 @@ bool da_pop(tDynamicArray *da, size_t index, void *buf)
 
 void da_print(tDynamicArray *da)
 {
+	if (!da) return;
 	if (!da->type)
 	{
 		printf("Can't print dynamic array as there is no type specified.");
@@ -284,12 +292,21 @@ void da_print(tDynamicArray *da)
 	printf("[");
 	for (size_t i = 0; i < da->count; i++)
 	{
+
 		void *item = da_get(da, i);
 		if (!strcmp(type, "int"))
 			printf("%d", *(int *)item);
+		else if (!strcmp(type, "unsigned int"))
+			printf("%u", *(unsigned int *)item);
+		else if (!strcmp(type, "bool"))
+		{
+			if (!(*(bool *)item))
+				printf("'False'");
+			else printf("'True'");
+		}
 		else if (!strcmp(type, "char"))
 			printf("'%c'", *(char *)item);
-		else if (!strcmp(type, "str") || !strcmp(type, "char*"))
+		else if (!strcmp(type, "str"))
 			printf("\"%s\"", *(char **)item);
 		else if (!strcmp(type, "float"))
 			printf("%f", *(float *)item);
@@ -299,8 +316,16 @@ void da_print(tDynamicArray *da)
 			printf("%zu", *(size_t *)item);
 		else if (!strcmp(type, "long"))
 			printf("%ld", *(long *)item);
+		else if (!strcmp(type, "unsigned long"))
+			printf("%lu", *(unsigned long *)item);
+		else if (!strcmp(type, "long long"))
+			printf("%ll", *(long long *)item);
+		else if (!strcmp(type, "unsigned long long"))
+			printf("%llu", *(unsigned long long *)item);
 		else if (!strcmp(type, "short"))
 			printf("%hd", *(short *)item);
+		else if (!strcmp(type, "unsigned short"))
+			printf("%hu", *(unsigned short *)item);
 		else if (!strcmp(type, "ptr"))
 			printf("%p", *(void **)item);
 		else
