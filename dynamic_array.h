@@ -8,8 +8,11 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+struct sDynamicArray;
+
 /* type enum, for printing. */
-typedef enum {
+typedef enum
+{
 	DA_UNKNOWN = 0,
 	DA_TYPE,
 	DA_INT,
@@ -37,14 +40,24 @@ typedef enum {
 	DA_U64
 } tDAType;
 
+typedef enum
+{
+	SUCCESS = 0,
+	INDEX_OOB_ERROR = 1,
+	CREATION_ERROR = 2,
+	RESIZE_ERROR = 3,
+	NULL_ARRAY_ERROR = 4,
+	NULL_VALUE_ERROR = 5,
+	UNKNOWN_TYPE_ERROR = 6
+} DAErrors;
+
 /* Custom display: called once per element by da_print.
  * Only used when the caller sets da->print_fn. Signature must be exactly
  * void (*)(void *); do NOT cast a differently-typed function into it. */
 typedef void (*tDAPrintFn)(void *item);
 
-struct sDynamicArray;
-
-typedef struct sDynamicArrayVTable {
+typedef struct sDynamicArrayVTable
+{
 	bool (*da_insert)(struct sDynamicArray *da, size_t index, void *value);
 	bool (*da_append)(struct sDynamicArray *da, void *value);
 	void *(*da_get)(struct sDynamicArray *da, size_t index);
@@ -53,7 +66,8 @@ typedef struct sDynamicArrayVTable {
 	void (*da_print)(struct sDynamicArray *da);
 } tDynamicArrayVTable;
 
-typedef struct sDynamicArray {
+typedef struct sDynamicArray
+{
 	void *array;
 	size_t count;
 	size_t capacity;
@@ -66,13 +80,6 @@ typedef struct sDynamicArray {
 	const tDynamicArrayVTable *vtable;
 } tDynamicArray;
 
-bool da_insert(tDynamicArray *da, size_t index, void *value);
-bool da_append(tDynamicArray *da, void *value);
-void *da_get(tDynamicArray *da, size_t index);
-bool da_set(tDynamicArray *da, size_t index, void *value);
-bool da_pop(tDynamicArray *da, size_t index, void *buf);
-void da_print(tDynamicArray *da);
-
 /*
  * da_create: build an array.
  *   type != DA_UNKNOWN : custom_size must be 0; item_size derived from type.
@@ -81,19 +88,6 @@ void da_print(tDynamicArray *da);
  * Returns NULL on invalid arguments or allocation failure; check
  * get_error_msg() for the reason.
  */
-tDynamicArray *da_create(tDAType type, size_t custom_size);
-void da_set_print_fn(tDynamicArray *da, tDAPrintFn fn);
-void da_free(tDynamicArray *da);
-
-typedef enum {
-	SUCCESS = 0,
-	INDEX_OOB_ERROR = 1,
-	CREATION_ERROR = 2,
-	RESIZE_ERROR = 3,
-	NULL_ARRAY_ERROR = 4,
-	NULL_VALUE_ERROR = 5,
-	UNKNOWN_TYPE_ERROR = 6
-} DAerrors;
 
 /*
  * get_error_msg reads the error state of the most recent da_* call.
@@ -105,15 +99,28 @@ typedef enum {
  * (see DA_THREAD_SAFE_ERROR_STATE). When that flag is 0, the slot is a
  * process-global static and these reads are NOT thread-safe.
  */
-const char* get_error_msg(void);
+bool da_insert(tDynamicArray *da, size_t index, void *value);
+bool da_append(tDynamicArray *da, void *value);
+void *da_get(tDynamicArray *da, size_t index);
+bool da_set(tDynamicArray *da, size_t index, void *value);
+bool da_pop(tDynamicArray *da, size_t index, void *buf);
+void da_print(tDynamicArray *da);
+tDynamicArray *da_create(tDAType type, size_t custom_size);
+void da_set_print_fn(tDynamicArray *da, tDAPrintFn fn);
+void da_free(tDynamicArray *da);
+const char* da_get_error_msg(void);
 
-#define DA_INSERT(a, i, v) ((a) ? (a)->vtable->da_insert((a), (i), (v)) : false)
-#define DA_APPEND(a, v) ((a) ? (a)->vtable->da_append((a), (v)) : false)
-#define DA_GET(a, i) ((a) ? (a)->vtable->da_get((a), (i)) : NULL)
-#define DA_SET(a, i, v) ((a) ? (a)->vtable->da_set((a), (i), (v)) : false)
-#define DA_POP(a, i, b) ((a) ? (a)->vtable->da_pop((a), (i), (b)) : false)
-#define DA_PRINT(a) ((a) ? (a)->vtable->da_print(a) : (void)0)
-
+// macros to the functions and a the sizeof() wrapper macro
+#define DA_INSERT(a, i, v) ((a) ? da_insert((a), (i), (v)) : false)
+#define DA_APPEND(a, v) ((a) ? da_append((a), (v)) : false)
+#define DA_GET(a, i) ((a) ? da_get((a), (i)) : NULL)
+#define DA_SET(a, i, v) ((a) ? da_set((a), (i), (v)) : false)
+#define DA_POP(a, i, b) ((a) ? da_pop((a), (i), (b)) : false)
+#define DA_PRINT(a) ((a) ? da_print(a) : (void)0)
+#define DA_CREATE(t, cs) (da_create((t), (cs)))
+#define DA_SET_PRINT_FN(a, fn) da_set_print_fn((a), (fn))
+#define DA_FREE(a) da_free((a))
+#define DA_GET_ERROR_MSG() da_get_error_msg()
 #define DA_TYPE_SIZE(T)    sizeof(T)
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
@@ -132,17 +139,17 @@ const char* get_error_msg(void);
 
 #if !DA_THREAD_SAFE_ERROR_STATE && !defined(DA_ACCEPT_UNSAFE_THREAD_STATE)
 #  if defined(__GNUC__) || defined(__clang__) || \
-      (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L)
+	(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L)
 #    warning "DA: error state is not thread-local on this toolchain (not thread-safe). Define DA_ACCEPT_UNSAFE_THREAD_STATE to silence."
 #  elif defined(_MSC_VER)
 #    pragma message("DA: error state is not thread-local on this toolchain (not thread-safe). Define DA_ACCEPT_UNSAFE_THREAD_STATE to silence.")
 #  endif
 #endif
 
+
 #ifdef DA_IMPLEMENTATION
 
 static DA_THREAD_LOCAL int8_t da_err_state = 0;
-
 static inline int8_t* get_err(void)
 {
 	return &da_err_state;
@@ -152,7 +159,8 @@ static inline int8_t* get_err(void)
 
 static size_t da_get_item_size(tDAType type)
 {
-	switch (type) {
+	switch (type)
+	{
 		case DA_INT:     return sizeof(int);
 		case DA_UINT:    return sizeof(unsigned int);
 		case DA_BOOL:    return sizeof(bool);
@@ -185,7 +193,11 @@ static size_t da_get_item_size(tDAType type)
 void da_free(tDynamicArray *da)
 {
 	DAERROR = SUCCESS;
-	if (!da) { DAERROR = NULL_ARRAY_ERROR; return; }
+	if (!da)
+	{
+		DAERROR = NULL_ARRAY_ERROR;
+		return;
+	}
 	free(da->array);
 	free(da);
 }
@@ -193,19 +205,37 @@ void da_free(tDynamicArray *da)
 tDynamicArray *da_create(tDAType type, size_t custom_size)
 {
 	DAERROR = SUCCESS;
-
 	size_t item_size;
-	if (type == DA_UNKNOWN) {
-		if (!custom_size) { DAERROR = CREATION_ERROR; return NULL; }
+	if (type == DA_UNKNOWN)
+	{
+		if (!custom_size)
+		{
+			DAERROR = CREATION_ERROR;
+			return NULL;
+		}
 		item_size = custom_size;
-	} else {
-		if (custom_size) { DAERROR = CREATION_ERROR; return NULL; }
+	}
+	else
+	{
+		if (custom_size)
+		{
+			DAERROR = CREATION_ERROR;
+			return NULL;
+		}
 		item_size = da_get_item_size(type);
 	}
-	if (!item_size) { DAERROR = CREATION_ERROR; return NULL; }
+	if (!item_size)
+	{
+		DAERROR = CREATION_ERROR;
+		return NULL;
+	}
 
 	tDynamicArray *da = malloc(sizeof(tDynamicArray));
-	if (!da) { DAERROR = CREATION_ERROR; return NULL; }
+	if (!da)
+	{
+		DAERROR = CREATION_ERROR;
+		return NULL;
+	}
 
 	da->array     = NULL;
 	da->count     = 0;
@@ -224,8 +254,16 @@ tDynamicArray *da_create(tDAType type, size_t custom_size)
 bool da_append(tDynamicArray *da, void *value)
 {
 	DAERROR = SUCCESS;
-	if (!da)    { DAERROR = NULL_ARRAY_ERROR; return false; }
-	if (!value) { DAERROR = NULL_VALUE_ERROR; return false; }
+	if (!da)
+	{
+		DAERROR = NULL_ARRAY_ERROR;
+		return false;
+	}
+	if (!value)
+	{
+		DAERROR = NULL_VALUE_ERROR;
+		return false;
+	}
 
 	void *new_array;
 	void *target;
@@ -233,12 +271,16 @@ bool da_append(tDynamicArray *da, void *value)
 	bool  aliased;
 
 	aliased = (da->array &&
-		(uintptr_t)value >= (uintptr_t)da->array &&
-		(uintptr_t)value <  (uintptr_t)da->array + da->count * da->item_size);
+			(uintptr_t)value >= (uintptr_t)da->array &&
+			(uintptr_t)value <  (uintptr_t)da->array + da->count * da->item_size);
 	if (aliased)
 	{
 		value_p = malloc(da->item_size);
-		if (!value_p) { DAERROR = RESIZE_ERROR; return false; }
+		if (!value_p)
+		{
+			DAERROR = RESIZE_ERROR;
+			return false;
+		}
 		memcpy(value_p, value, da->item_size);
 	}
 	else value_p = value;
@@ -246,20 +288,24 @@ bool da_append(tDynamicArray *da, void *value)
 	if (da->count >= da->capacity)
 	{
 		size_t cap_tmp = da->capacity;
-		if (cap_tmp == 0) cap_tmp = 256;
-		else if (cap_tmp > SIZE_MAX / 2) {
+		if (cap_tmp == 0)
+			cap_tmp = 256;
+		else if (cap_tmp > SIZE_MAX / 2)
+		{
 			if (aliased) free(value_p);
 			DAERROR = RESIZE_ERROR;
 			return false;
 		}
 		else cap_tmp *= 2;
-		if (cap_tmp > SIZE_MAX / da->item_size) {
+		if (cap_tmp > SIZE_MAX / da->item_size)
+		{
 			if (aliased) free(value_p);
 			DAERROR = RESIZE_ERROR;
 			return false;
 		}
 		new_array = realloc(da->array, cap_tmp * da->item_size);
-		if (!new_array) {
+		if (!new_array)
+		{
 			if (aliased) free(value_p);
 			DAERROR = RESIZE_ERROR;
 			return false;
@@ -277,17 +323,37 @@ bool da_append(tDynamicArray *da, void *value)
 void *da_get(tDynamicArray *da, size_t index)
 {
 	DAERROR = SUCCESS;
-	if (!da) { DAERROR = NULL_ARRAY_ERROR; return NULL; }
-	if (index >= da->count) { DAERROR = INDEX_OOB_ERROR; return NULL; }
+	if (!da)
+	{
+		DAERROR = NULL_ARRAY_ERROR;
+		return NULL;
+	}
+	if (index >= da->count)
+	{
+		DAERROR = INDEX_OOB_ERROR;
+		return NULL;
+	}
 	return (uint8_t *)da->array + (index * da->item_size);
 }
 
 bool da_set(tDynamicArray *da, size_t index, void *value)
 {
 	DAERROR = SUCCESS;
-	if (!da)    { DAERROR = NULL_ARRAY_ERROR; return false; }
-	if (!value) { DAERROR = NULL_VALUE_ERROR; return false; }
-	if (index >= da->count) { DAERROR = INDEX_OOB_ERROR; return false; }
+	if (!da)
+	{
+		DAERROR = NULL_ARRAY_ERROR;
+		return false;
+	}
+	if (!value)
+	{
+		DAERROR = NULL_VALUE_ERROR;
+		return false;
+	}
+	if (index >= da->count)
+	{
+		DAERROR = INDEX_OOB_ERROR;
+		return false;
+	}
 	void *target = (char *)da->array + (index * da->item_size);
 	if (target == value) return true;
 	memcpy(target, value, da->item_size);
@@ -297,8 +363,16 @@ bool da_set(tDynamicArray *da, size_t index, void *value)
 bool da_insert(tDynamicArray *da, size_t index, void *value)
 {
 	DAERROR = SUCCESS;
-	if (!da)    { DAERROR = NULL_ARRAY_ERROR; return false; }
-	if (!value) { DAERROR = NULL_VALUE_ERROR; return false; }
+	if (!da)
+	{
+		DAERROR = NULL_ARRAY_ERROR;
+		return false;
+	}
+	if (!value)
+	{
+		DAERROR = NULL_VALUE_ERROR;
+		return false;
+	}
 
 	void  *new_array;
 	void  *target;
@@ -309,17 +383,22 @@ bool da_insert(tDynamicArray *da, size_t index, void *value)
 	bool  aliased;
 
 	aliased = (da->array &&
-		(uintptr_t)value >= (uintptr_t)da->array &&
-		(uintptr_t)value <  (uintptr_t)da->array + da->count * da->item_size);
+			(uintptr_t)value >= (uintptr_t)da->array &&
+			(uintptr_t)value <  (uintptr_t)da->array + da->count * da->item_size);
 	if (aliased)
 	{
 		value_p = malloc(da->item_size);
-		if (!value_p) { DAERROR = RESIZE_ERROR; return false; }
+		if (!value_p)
+		{
+			DAERROR = RESIZE_ERROR;
+			return false;
+		}
 		memcpy(value_p, value, da->item_size);
 	}
 	else value_p = value;
 
-	if (index > da->count) {
+	if (index > da->count)
+	{
 		if (aliased) free(value_p);
 		DAERROR = INDEX_OOB_ERROR;
 		return false;
@@ -327,20 +406,24 @@ bool da_insert(tDynamicArray *da, size_t index, void *value)
 	if (da->count >= da->capacity)
 	{
 		size_t cap_tmp = da->capacity;
-		if (cap_tmp == 0) cap_tmp = 256;
-		else if (cap_tmp > SIZE_MAX / 2) {
+		if (cap_tmp == 0)
+			cap_tmp = 256;
+		else if (cap_tmp > SIZE_MAX / 2)
+		{
 			if (aliased) free(value_p);
 			DAERROR = RESIZE_ERROR;
 			return false;
 		}
 		else cap_tmp *= 2;
-		if (cap_tmp > SIZE_MAX / da->item_size) {
+		if (cap_tmp > SIZE_MAX / da->item_size)
+		{
 			if (aliased) free(value_p);
 			DAERROR = RESIZE_ERROR;
 			return false;
 		}
 		new_array = realloc(da->array, cap_tmp * da->item_size);
-		if (!new_array) {
+		if (!new_array)
+		{
 			if (aliased) free(value_p);
 			DAERROR = RESIZE_ERROR;
 			return false;
@@ -363,8 +446,16 @@ bool da_insert(tDynamicArray *da, size_t index, void *value)
 bool da_pop(tDynamicArray *da, size_t index, void *buf)
 {
 	DAERROR = SUCCESS;
-	if (!da) { DAERROR = NULL_ARRAY_ERROR; return false; }
-	if (index >= da->count) { DAERROR = INDEX_OOB_ERROR; return false; }
+	if (!da)
+	{
+		DAERROR = NULL_ARRAY_ERROR;
+		return false;
+	}
+	if (index >= da->count)
+	{
+		DAERROR = INDEX_OOB_ERROR;
+		return false;
+	}
 	if (buf) memcpy(buf, (uint8_t *)da->array + (index * da->item_size), da->item_size);
 	size_t elements_to_move = da->count - index - 1;
 	void *src = (uint8_t *)da->array + ((index + 1) * da->item_size);
@@ -378,14 +469,23 @@ bool da_pop(tDynamicArray *da, size_t index, void *buf)
 void da_print(tDynamicArray *da)
 {
 	DAERROR = SUCCESS;
-	if (!da) { DAERROR = NULL_ARRAY_ERROR; return; }
-	if (da->count == 0) { printf("[]\n"); return; }
+	if (!da)
+	{
+		DAERROR = NULL_ARRAY_ERROR;
+		return;
+	}
+	if (da->count == 0)
+	{
+		printf("[]\n");
+		return;
+	}
 
 	/* Unprintable: DA_UNKNOWN with no print_fn. Not an error — the caller
 	 * just didn't ask for formatted output. */
-	if (!da->print_fn && da->type == DA_UNKNOWN) {
+	if (!da->print_fn && da->type == DA_UNKNOWN)
+	{
 		printf("[<unprintable: %zu items of %zu bytes>]\n",
-		       da->count, da->item_size);
+				da->count, da->item_size);
 		return;
 	}
 
@@ -394,9 +494,12 @@ void da_print(tDynamicArray *da)
 	{
 		void *item = (uint8_t *)da->array + i * da->item_size;
 
-		if (da->print_fn) {
+		if (da->print_fn)
+		{
 			da->print_fn(item);
-		} else {
+		}
+		else
+		{
 			switch (da->type)
 			{
 				case DA_INT:    printf("%d", *(int *)item); break;
@@ -404,10 +507,10 @@ void da_print(tDynamicArray *da)
 				case DA_BOOL:   printf("'%s'", *(bool *)item ? "True" : "False"); break;
 				case DA_CHAR:   printf("'%c'", *(char *)item); break;
 				case DA_STR: {
-					char *s = *(char **)item;
-					printf("\"%s\"", s ? s : "(null)");
-					break;
-				}
+								 char *s = *(char **)item;
+								 printf("\"%s\"", s ? s : "(null)");
+								 break;
+							 }
 				case DA_FLOAT:  printf("%f", *(float *)item); break;
 				case DA_DOUBLE: printf("%f", *(double *)item); break;
 				case DA_SIZE:   printf("%zu", *(size_t *)item); break;
@@ -429,8 +532,8 @@ void da_print(tDynamicArray *da)
 				case DA_TYPE:
 				case DA_UNKNOWN:
 				default:
-					DAERROR = UNKNOWN_TYPE_ERROR;
-					goto done;
+								DAERROR = UNKNOWN_TYPE_ERROR;
+								goto done;
 			}
 		}
 		if (i < da->count - 1) printf(", ");
@@ -439,7 +542,7 @@ done:
 	printf("]\n");
 }
 
-const char* get_error_msg(void)
+const char* da_get_error_msg(void)
 {
 	switch (DAERROR)
 	{
@@ -456,9 +559,13 @@ const char* get_error_msg(void)
 
 void da_set_print_fn(tDynamicArray *da, tDAPrintFn fn)
 {
-    DAERROR = SUCCESS;
-    if (!da) { DAERROR = NULL_ARRAY_ERROR; return; }
-    da->print_fn = fn;
+	DAERROR = SUCCESS;
+	if (!da)
+	{
+		DAERROR = NULL_ARRAY_ERROR;
+		return;
+	}
+	da->print_fn = fn;
 }
 #endif
 

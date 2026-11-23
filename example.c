@@ -22,196 +22,196 @@ int main(void)
 { 
 	/* ---- int ---- */
 	tDynamicArray *ints = da_create(DA_INT, 0);
-	DA_APPEND(ints, &(int){42});
-	DA_APPEND(ints, &(int){-7});
-	DA_APPEND(ints, &(int){1000});
-	DA_PRINT(ints);
+	da_append(ints, &(int){42});
+	da_append(ints, &(int){-7});
+	da_append(ints, &(int){1000});
+	da_print(ints);
 	da_free(ints);
 
 	/* ---- unsigned int ---- */
 	tDynamicArray *uints = da_create(DA_UINT, 0);
-	DA_APPEND(uints, &(unsigned int){3u});
-	DA_APPEND(uints, &(unsigned int){UINT_MAX});
-	DA_PRINT(uints);
+	da_append(uints, &(unsigned int){3u});
+	da_append(uints, &(unsigned int){UINT_MAX});
+	da_print(uints);
 	da_free(uints);
 
 	/* ---- bool ---- */
 	tDynamicArray *bools = da_create(DA_BOOL, 0);
-	DA_APPEND(bools, &(bool){true});
-	DA_APPEND(bools, &(bool){false});
-	DA_PRINT(bools);
+	da_append(bools, &(bool){true});
+	da_append(bools, &(bool){false});
+	da_print(bools);
 	da_free(bools);
 
 	/* ---- char ---- */
 	tDynamicArray *chars = da_create(DA_CHAR, 0);
-	DA_APPEND(chars, &(char){'A'});
-	DA_APPEND(chars, &(char){'z'});
-	DA_APPEND(chars, &(char){'\n'});
-	DA_PRINT(chars);
+	da_append(chars, &(char){'a'});
+	da_append(chars, &(char){'z'});
+	da_append(chars, &(char){'\n'});
+	da_print(chars);
 	da_free(chars);
 
 	/* ---- str (char *) ---- */
 	tDynamicArray *strs = da_create(DA_STR, 0);
-	DA_APPEND(strs, &(char *){"hello"});
-	DA_APPEND(strs, &(char *){"world"});
-	DA_APPEND(strs, &(char *){NULL});
-	DA_PRINT(strs);
+	da_append(strs, &(char *){"hello"});
+	da_append(strs, &(char *){"world"});
+	da_append(strs, &(char *){NULL});
+	da_print(strs);
 	da_free(strs);
 
 	/* ---- float ---- */
 	tDynamicArray *floats = da_create(DA_FLOAT, 0);
-	DA_APPEND(floats, &(float){3.14f});
-	DA_APPEND(floats, &(float){-0.5f});
-	DA_PRINT(floats);
+	da_append(floats, &(float){3.14f});
+	da_append(floats, &(float){-0.5f});
+	da_print(floats);
 	da_free(floats);
 
 	/* ---- double ---- */
 	tDynamicArray *doubles = da_create(DA_DOUBLE, 0);
-	DA_APPEND(doubles, &(double){2.718281828459045});
-	DA_APPEND(doubles, &(double){-1.5});
-	DA_PRINT(doubles);
+	da_append(doubles, &(double){2.718281828459045});
+	da_append(doubles, &(double){-1.5});
+	da_print(doubles);
 	da_free(doubles);
 
 	/* ---- size_t ---- */
 	tDynamicArray *sizes = da_create(DA_SIZE, 0);
-	DA_APPEND(sizes, &(size_t){0});
-	DA_APPEND(sizes, &(size_t){SIZE_MAX});
-	DA_PRINT(sizes);
+	da_append(sizes, &(size_t){0});
+	da_append(sizes, &(size_t){SIZE_MAX});
+	da_print(sizes);
 	da_free(sizes);
 
 	/* ---- long ---- */
 	tDynamicArray *longs = da_create(DA_LONG, 0);
-	DA_APPEND(longs, &(long){LONG_MIN});
-	DA_APPEND(longs, &(long){LONG_MAX});
-	DA_PRINT(longs);
+	da_append(longs, &(long){LONG_MIN});
+	da_append(longs, &(long){LONG_MAX});
+	da_print(longs);
 	da_free(longs);
 
 	/* ---- unsigned long ---- */
 	tDynamicArray *ulongs = da_create(DA_ULONG, 0);
-	DA_APPEND(ulongs, &(unsigned long){0UL});
-	DA_APPEND(ulongs, &(unsigned long){ULONG_MAX});
-	DA_PRINT(ulongs);
+	da_append(ulongs, &(unsigned long){0ul});
+	da_append(ulongs, &(unsigned long){ULONG_MAX});
+	da_print(ulongs);
 	da_free(ulongs);
 
 	/* ---- long long ---- */
 	tDynamicArray *llongs = da_create(DA_LLONG, 0);
-	DA_APPEND(llongs, &(long long){LLONG_MIN});
-	DA_APPEND(llongs, &(long long){LLONG_MAX});
-	DA_PRINT(llongs);
+	da_append(llongs, &(long long){LLONG_MIN});
+	da_append(llongs, &(long long){LLONG_MAX});
+	da_print(llongs);
 	da_free(llongs);
 
 	/* ---- unsigned long long ---- */
 	tDynamicArray *ullongs = da_create(DA_ULLONG, 0);
-	DA_APPEND(ullongs, &(unsigned long long){0ULL});
-	DA_APPEND(ullongs, &(unsigned long long){ULLONG_MAX});
-	DA_PRINT(ullongs);
+	da_append(ullongs, &(unsigned long long){0ULL});
+	da_append(ullongs, &(unsigned long long){ULLONG_MAX});
+	da_print(ullongs);
 	da_free(ullongs);
 
 	/* ---- short ---- */
 	tDynamicArray *shorts = da_create(DA_SHORT, 0);
-	DA_APPEND(shorts, &(short){SHRT_MIN});
-	DA_APPEND(shorts, &(short){SHRT_MAX});
-	DA_PRINT(shorts);
+	da_append(shorts, &(short){SHRT_MIN});
+	da_append(shorts, &(short){SHRT_MAX});
+	da_print(shorts);
 	da_free(shorts);
 
 	/* ---- unsigned short ---- */
 	tDynamicArray *ushorts = da_create(DA_USHORT, 0);
-	DA_APPEND(ushorts, &(unsigned short){0});
-	DA_APPEND(ushorts, &(unsigned short){USHRT_MAX});
-	DA_PRINT(ushorts);
+	da_append(ushorts, &(unsigned short){0});
+	da_append(ushorts, &(unsigned short){USHRT_MAX});
+	da_print(ushorts);
 	da_free(ushorts);
 
 	/* ---- ptr (void *) ---- */
 	int sentinel = 7;
 	tDynamicArray *ptrs = da_create(DA_PTR, 0);
-	DA_APPEND(ptrs, &(void *){&sentinel});
-	DA_APPEND(ptrs, &(void *){NULL});
-	DA_PRINT(ptrs);
+	da_append(ptrs, &(void *){&sentinel});
+	da_append(ptrs, &(void *){NULL});
+	da_print(ptrs);
 	da_free(ptrs);
 
 	/* ---- int8_t ---- */
 	tDynamicArray *i8 = da_create(DA_I8, 0);
-	DA_APPEND(i8, &(int8_t){INT8_MIN});
-	DA_APPEND(i8, &(int8_t){INT8_MAX});
-	DA_PRINT(i8);
+	da_append(i8, &(int8_t){INT8_MIN});
+	da_append(i8, &(int8_t){INT8_MAX});
+	da_print(i8);
 	da_free(i8);
 
 	/* ---- int16_t ---- */
 	tDynamicArray *i16 = da_create(DA_I16, 0);
-	DA_APPEND(i16, &(int16_t){INT16_MIN});
-	DA_APPEND(i16, &(int16_t){INT16_MAX});
-	DA_PRINT(i16);
+	da_append(i16, &(int16_t){INT16_MIN});
+	da_append(i16, &(int16_t){INT16_MAX});
+	da_print(i16);
 	da_free(i16);
 
 	/* ---- int32_t ---- */
 	tDynamicArray *i32 = da_create(DA_I32, 0);
-	DA_APPEND(i32, &(int32_t){INT32_MIN});
-	DA_APPEND(i32, &(int32_t){INT32_MAX});
-	DA_PRINT(i32);
+	da_append(i32, &(int32_t){INT32_MIN});
+	da_append(i32, &(int32_t){INT32_MAX});
+	da_print(i32);
 	da_free(i32);
 
 	/* ---- int64_t ---- */
 	tDynamicArray *i64 = da_create(DA_I64, 0);
-	DA_APPEND(i64, &(int64_t){INT64_MIN});
-	DA_APPEND(i64, &(int64_t){INT64_MAX});
-	DA_PRINT(i64);
+	da_append(i64, &(int64_t){INT64_MIN});
+	da_append(i64, &(int64_t){INT64_MAX});
+	da_print(i64);
 	da_free(i64);
 
 	/* ---- uint8_t ---- */
 	tDynamicArray *u8 = da_create(DA_U8, 0);
-	DA_APPEND(u8, &(uint8_t){0});
-	DA_APPEND(u8, &(uint8_t){UINT8_MAX});
-	DA_PRINT(u8);
+	da_append(u8, &(uint8_t){0});
+	da_append(u8, &(uint8_t){UINT8_MAX});
+	da_print(u8);
 	da_free(u8);
 
 	/* ---- uint16_t ---- */
 	tDynamicArray *u16 = da_create(DA_U16, 0);
-	DA_APPEND(u16, &(uint16_t){0});
-	DA_APPEND(u16, &(uint16_t){UINT16_MAX});
-	DA_PRINT(u16);
+	da_append(u16, &(uint16_t){0});
+	da_append(u16, &(uint16_t){UINT16_MAX});
+	da_print(u16);
 	da_free(u16);
 
 	/* ---- uint32_t ---- */
 	tDynamicArray *u32 = da_create(DA_U32, 0);
-	DA_APPEND(u32, &(uint32_t){0});
-	DA_APPEND(u32, &(uint32_t){UINT32_MAX});
-	DA_PRINT(u32);
+	da_append(u32, &(uint32_t){0});
+	da_append(u32, &(uint32_t){UINT32_MAX});
+	da_print(u32);
 	da_free(u32);
 
 	/* ---- uint64_t ---- */
 	tDynamicArray *u64 = da_create(DA_U64, 0);
-	DA_APPEND(u64, &(uint64_t){0});
-	DA_APPEND(u64, &(uint64_t){UINT64_MAX});
-	DA_PRINT(u64);
+	da_append(u64, &(uint64_t){0});
+	da_append(u64, &(uint64_t){UINT64_MAX});
+	da_print(u64);
 	da_free(u64);
 
 	/* ---- other operations, same compound-literal style ---- */
 	tDynamicArray *demo = da_create(DA_INT, 0);
-	DA_APPEND(demo, &(int){10});
-	DA_APPEND(demo, &(int){20});
-	DA_INSERT(demo, 1, &(int){15});
-	DA_SET   (demo, 2, &(int){99});
-	DA_PRINT (demo);
+	da_append(demo, &(int){10});
+	da_append(demo, &(int){20});
+	da_insert(demo, 1, &(int){15});
+	da_set   (demo, 2, &(int){99});
+	da_print (demo);
 
 	int popped = 0;
-	DA_POP(demo, 0, &popped);
+	da_pop(demo, 0, &popped);
 	printf("popped = %d\n", popped);
 
-	int *first = DA_GET(demo, 0);
+	int *first = da_get(demo, 0);
 	if (first) printf("first = %d\n", *first);
 	da_free(demo);
 
 	tDynamicArray *pts = da_create(DA_UNKNOWN, sizeof(vec2));
 	if (!pts) {
-		printf("create: %s\n", get_error_msg());
+		printf("create: %s\n", da_get_error_msg());
 		return 1;
 	}
 	pts->print_fn = print_point;
 	vec2 a = {1.23, 2.93};
 	vec2 b = {3.22, 4.03};
-	DA_APPEND(pts, &a);
-	DA_APPEND(pts, &b);
-	DA_PRINT(pts);
+	da_append(pts, &a);
+	da_append(pts, &b);
+	da_print(pts);
 	da_free(pts);
 
 	return 0;
